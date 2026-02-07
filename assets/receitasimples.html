@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INEMATT - Papel Timbrado A5</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Alfa+Slab+One&display=swap');
+
+        /* Reset e Configuração Básica */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Configuração da Página A5 */
+        .page-a5 {
+            width: 148mm;
+            height: 210mm;
+            background: white;
+            position: relative;
+            overflow: hidden; /* Corta o círculo verde que sai da página */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-top: 15mm; /* Espaço topo */
+        }
+
+        /* --- Header / Logo --- */
+        header {
+            text-align: center;
+            color: #004d25; /* Verde Escuro INEMATT */
+            z-index: 2;
+        }
+
+        /* Símbolo do Logo (Recriado em CSS/SVG simples) */
+        .logo-symbol {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 5px auto;
+            position: relative;
+        }
+
+        .logo-symbol svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #004d25;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .logo-title {
+            font-family: 'Alfa Slab One', serif; /* Fonte grossa similar */
+            font-size: 26pt;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-subtitle {
+            font-family: 'Roboto', sans-serif;
+            font-size: 7.5pt;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #004d25;
+        }
+
+        /* --- Conteúdo Principal (Vazio) --- */
+        main {
+            flex-grow: 1;
+        }
+
+        /* --- Footer --- */
+        footer {
+            position: relative;
+            width: 100%;
+            height: 45mm; /* Altura da área do rodapé */
+            font-size: 6pt; /* Fonte bem pequena conforme original */
+            color: #1a1a1a;
+            display: flex;
+            align-items: flex-end; /* Texto alinhado ao fundo */
+            padding-bottom: 8mm;
+        }
+
+        /* O Círculo Verde Decorativo */
+        .green-curve {
+            position: absolute;
+            bottom: -80mm;
+            right: -50mm;
+            width: 160mm;
+            height: 160mm;
+            background-color: #bedb39; /* Verde Limão */
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* Colunas de Endereço */
+        .address-container {
+            position: relative;
+            z-index: 1; /* Texto acima do círculo verde */
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 5mm; /* Margens laterais */
+            gap: 2mm;
+        }
+
+        .col {
+            flex: 1;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .col p {
+            margin-bottom: 0;
+        }
+
+        /* Ajustes Específicos para Print */
+        @media print {
+            body {
+                background: none;
+                height: auto;
+            }
+            .page-a5 {
+                box-shadow: none;
+                margin: 0;
+                width: 148mm;
+                height: 210mm;
+            }
+            @page {
+                size: A5 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-a5">
+        <header>
+            <div class="logo-symbol">
+                <svg viewBox="0 0 50 50">
+                    <path d="M10,25 A15,15 0 0,1 40,25" />
+                    <circle cx="25" cy="18" r="4" fill="#004d25" stroke="none"/>
+                    <path d="M15,25 L15,35 L35,35 L35,25" stroke-width="2"/>
+                </svg>
+            </div>
+            <h1 class="logo-title">INEMATT</h1>
+            <h2 class="logo-subtitle">INSTITUTO NEFROLÓGICO</h2>
+        </header>
+
+        <main>
+            </main>
+
+        <footer>
+            <div class="green-curve"></div>
+
+            <div class="address-container">
+                <div class="col">
+                    <p>Rua Espírito Santo, S/Nº Anexo a Rede Cegonha</p>
+                    <p>Fone: (65) 3621-4060 / 3051-4060 / 3026-3005</p>
+                    <p>Bairro Nova Várzea Grande</p>
+                    <p>CEP: 78135-700 - Várzea Grande - MT</p>
+                </div>
+
+                <div class="col">
+                    <p>Rua São Caetano, 441</p>
+                    <p>Atrás Hosp. São Lucas - Fone: (66) 99688-2040</p>
+                    <p>Bairro Cidade Primavera 1</p>
+                    <p>CEP 78850-000 - Primavera do Leste - MT</p>
+                </div>
+
+                <div class="col">
+                    <p>Av. Brasil, 2604</p>
+                    <p>Fone: (66) 3199-1305</p>
+                    <p>Bairro: Vila Romana</p>
+                    <p>Cep: 7889 -138 - Sorriso-MT</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>

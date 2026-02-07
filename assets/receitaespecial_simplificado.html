@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receituário Controle Especial - INEMATT</title>
+    <style>
+        :root {
+            --primary-green: #006b35; 
+            --text-color: #000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 1123px;
+            max-height: 794px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .receipt {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Linha pontilhada apenas na primeira via */
+        .receipt:first-child {
+            border-right: 2px dashed #333;
+        }
+
+        /* === CABEÇALHO === */
+        .main-title {
+            color: var(--primary-green);
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .header-box {
+            border: 2px solid var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        .header-strip {
+            background-color: var(--primary-green);
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .via-badge {
+            background-color: #fff;
+            color: var(--primary-green);
+            padding: 1px 4px;
+            font-size: 9px;
+            border-radius: 2px;
+            margin-left: auto;
+        }
+
+        .header-content {
+            padding: 5px;
+            display: flex;
+            gap: 10px;
+            font-size: 10px;
+        }
+
+        .logo-area {
+            width: 90px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        .info-area {
+            flex: 1;
+        }
+
+        .info-area h1 {
+            color: var(--primary-green);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .info-area p {
+            margin-bottom: 2px;
+            font-size: 9px;
+        }
+
+        .cnpj-strip {
+            border-top: 1px solid var(--primary-green);
+            padding: 3px 5px;
+            font-size: 9px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        /* === CORPO === */
+        .form-line {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-end;
+            font-size: 12px;
+        }
+
+        .label {
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+
+        .line {
+            flex: 1;
+            border-bottom: 1px solid #000;
+        }
+
+        .prescription-area {
+            flex: 1;
+            min-height: 150px;
+            page-break-inside: avoid;
+        }
+
+        .date-signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            align-items: flex-end;
+            font-size: 11px;
+        }
+
+        .date-box {
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        .signature-line {
+            width: 250px;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 2px;
+        }
+
+        /* === RODAPÉ === */
+        .footer-grid {
+            display: flex;
+            gap: 10px;
+            height: 140px;
+        }
+
+        .footer-box {
+            border: 2px solid var(--primary-green);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-title {
+            background-color: var(--primary-green);
+            color: white;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px;
+            text-transform: uppercase;
+        }
+
+        .footer-content {
+            padding: 5px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+
+        .small-input {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 4px;
+        }
+        
+        .small-line {
+            flex: 1;
+            border-bottom: 1px solid #ccc;
+            height: 14px;
+        }
+
+        .footer-bottom-note {
+            text-align: center;
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .row-split {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .row-split .small-input {
+            flex: 1;
+        }
+
+        .supplier-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        @media print {
+            body { 
+                background-color: white; 
+                padding: 0; 
+                margin: 0;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt" id="modeloReceita">
+        <div class="main-title">RECEITUÁRIO CONTROLE ESPECIAL</div>
+        
+        <div class="header-box">
+            <div class="header-strip">
+                <span>IDENTIFICAÇÃO DO EMITENTE</span>
+                <span class="via-badge">1ª VIA - FARMÁCIA</span>
+            </div>
+            <div class="header-content">
+                <div class="logo-area">
+                    <img src="assets/logoinematt.png" alt="Logo INEMATT" class="logo-img">
+                </div>
+                <div class="info-area">
+                    <h1>INEMATT - INSTITUTO NEFROLÓGICO LTDA</h1>
+                    <p>Rua Espírito Santo, S/Nº - Anexo a Rede Cegonha - Fones: (65) 3621-4060 / 3051-4060 / 3026-3005</p>
+                    <p>Bairro Nova Várzea Grande - CEP: 78135-706 - Várzea Grande - Mato Grosso</p>
+                    <p>Rua São Caetano, 441 Atrás Hosp. São Lucas - Fone: (66) 9.9686-2040 Bairro Cidade Primavera - 1</p>
+                    <p>CEP: 78830-000 - Primavera do Leste - MT.</p>
+                    <p>Av. Brasil, 2004 - Fone: (66) 3199-1305 - Bairro: Vila Romana. Cep: 78891-138 - Cidade: Sorriso-MT</p>
+                </div>
+            </div>
+            <div class="cnpj-strip">
+                <span>CNPJ Várzea Grande: 73.814.550/0001-18</span>
+                <span>CNPJ SORRISO: 73.814.550/0008-94</span>
+            </div>
+            <div class="cnpj-strip" style="border-top: none; padding-top: 0;">
+                <span>CNPJ Primavera: 73.814.550/0007-03</span>
+                <span>INSC. EST.: ISENTO</span>
+            </div>
+        </div>
+
+        <div class="form-line"><span class="label">Paciente:</span><div class="line" style="position: relative;"><span style="position: absolute; left: 0; top: -2px; font-size: 10px;">{{PATIENTE_NOME}}</span></div></div>
+        <div class="form-line"><span class="label">Endereço:</span><div class="line" style="position: relative;"><span style="position: absolute; left: 0; top: -2px; font-size: 10px;">{{PATIENTE_ENDERECO}}</span></div></div>
+        <div class="form-line"><span class="label">Prescrição:</span></div>
+        <div class="prescription-area">{{MEDICAMENTOS}}</div>
+        
+        <div class="date-signature-row">
+            <div class="date-box"><br><span style="font-size: 9px; margin-left: 20px;">{{DATA_RECEITA}}</span></div>
+            <div class="signature-line">{{MEDICO_NOME}} </br> MÉDICO </br> {{MEDICO_CRM}} </div>
+        </div>
+
+        <div class="footer-grid">
+            <div class="footer-box">
+                <div class="footer-title">IDENTIFICAÇÃO DO COMPRADOR</div>
+                <div class="footer-content">
+                    <div class="small-input"><span>Nome completo:</span><div class="small-line"></div></div>
+                    <div class="row-split"><div class="small-input" style="flex: 1;"><span>Identidade:</span><div class="small-line"></div></div><div class="small-input" style="flex: 1;"><span>orgão Emissor:</span><div class="small-line"></div></div></div>
+                    <div class="small-input"><span>End:</span><div class="small-line"></div></div>
+                    <div class="row-split"><div class="small-input" style="flex: 2;"><span>Cidade:</span><div class="small-line"></div></div><div class="small-input" style="flex: 0.5;"><span>UF:</span><div class="small-line"></div></div></div>
+                    <div class="small-input"><span>Tel.:</span><div class="small-line"></div></div>
+                </div>
+            </div>
+            <div class="footer-box">
+                <div class="footer-title">IDENTIFICAÇÃO DO FORNECEDOR</div>
+                <div class="footer-content supplier-content">
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div style="flex: 1; text-align: center;"><div style="border-bottom: 1px solid #000; margin-bottom: 2px;"></div><span style="font-size: 8px;">Assinatura do Farmacêutico</span></div>
+                        <div style="width: 80px; text-align: center;"><div style="border-bottom: 1px solid #000; margin-bottom: 2px;">__/__/__</div><span style="font-size: 8px;">Data</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom-note">BULA DOS PRODUTOS NA PARTE INTERNA DO BLOCO</div>
+    </div>
+
+    <script>
+        // Quando a página carregar, duplicar para criar 2ª via
+        document.addEventListener("DOMContentLoaded", function() {
+            const receitaOriginal = document.getElementById('modeloReceita');
+            
+            // Clonar (duplicar) a receita inteira
+            const receitaCopia = receitaOriginal.cloneNode(true);
+
+            // Remover o ID da cópia para não ter IDs duplicados
+            receitaCopia.removeAttribute('id');
+
+            // Alterar o texto da "badge" na cópia para 2ª VIA
+            const badge2 = receitaCopia.querySelector('.via-badge');
+            if(badge2) {
+                badge2.innerText = '2ª VIA - PACIENTE';
+                // Adicionar o estilo verde na 2ª via
+                badge2.style.backgroundColor = 'var(--primary-green)';
+                badge2.style.color = 'white';
+                badge2.style.border = '1px solid white';
+            }
+
+            // Adicionar a cópia na página
+            document.body.appendChild(receitaCopia);
+        });
+    </script>
+</body>
+</html>
