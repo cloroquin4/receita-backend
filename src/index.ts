@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5001
 
 app.use(helmet())
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'https://receita-eta.vercel.app',
   credentials: true
 }))
 app.use(express.json())
@@ -34,8 +34,7 @@ const startServer = async () => {
   try {
     await initDatabase()
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor rodando na porta ${PORT}`)
-      console.log(`📊 Dashboard: http://localhost:${PORT}`)
+console.log('Servidor iniciado com sucesso');
     })
   } catch (error) {
     console.error('❌ Falha ao iniciar servidor:', error)
