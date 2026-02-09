@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer'
+import * as htmlPdf from 'html-pdf-node'
 import { Prescription, Patient, User, PatientData } from '../types'
 import { readFileSync } from 'fs'
 import { join } from 'path'
@@ -9,8 +9,6 @@ export class HTMLToPDFService {
     patient: PatientData,
     doctor: User
   ): Promise<string> {
-    let browser
-    
     console.log('=== INÍCIO generateSpecialControlPDF ===')
     console.log('Prescription:', JSON.stringify(prescription, null, 2))
     console.log('Patient:', JSON.stringify(patient, null, 2))
@@ -28,78 +26,56 @@ export class HTMLToPDFService {
       console.log('2. Preenchendo template...')
       const filledHtml = this.fillTemplate(htmlTemplate, prescription, patient, doctor)
       console.log('Template preenchido, tamanho:', filledHtml.length, 'caracteres')
-      console.log('Primeiros 200 caracteres do HTML:', filledHtml.substring(0, 200))
       
-      // 3. Launch Puppeteer (usando Chrome do macOS)
-      browser = await puppeteer.launch({
-        headless: "new",
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ],
-        timeout: 60000,
-        // Tentar usar Chrome instalado, fallback para Chromium bundled
-        executablePath: process.platform === 'darwin' 
-          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-          : undefined
-      })
-      
-      const page = await browser.newPage()
-      
-      // 4. Set content e wait for load
-      await page.setContent(filledHtml, {
-        waitUntil: 'domcontentloaded',
-        timeout: 15000
-      })
-      
-      // 5. Gerar PDF (configuração simples)
-      const pdfBuffer = await page.pdf({
+      // 3. Configurar opções do PDF
+      const options: any = {
         format: 'A4',
         landscape: true,
         printBackground: true,
-        timeout: 30000
-      })
+        margin: {
+          top: '0mm',
+          right: '0mm',
+          bottom: '0mm',
+          left: '0mm'
+        },
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        preferCSSPageSize: true
+      }
       
-      // 6. Converter para base64
+      const file: any = { content: filledHtml }
+      
+      // 4. Gerar PDF usando html-pdf-node
+      console.log('3. Gerando PDF com html-pdf-node...')
+      const pdfBuffer = await (htmlPdf as any).generatePdf(file, options) as Buffer
+      
+      // 5. Converter para base64
       const pdfBase64 = pdfBuffer.toString('base64')
+      console.log('✅ PDF gerado com sucesso:', pdfBuffer.length, 'bytes')
       
       return pdfBase64
       
     } catch (error) {
-      console.error('Erro ao gerar PDF com Puppeteer:', error)
+      console.error('Erro ao gerar PDF com html-pdf-node:', error)
       console.error('Detalhes do erro:', {
         message: error instanceof Error ? error.message : 'Erro desconhecido',
         stack: error instanceof Error ? error.stack : 'No stack',
         name: error instanceof Error ? error.name : 'Unknown'
       })
       throw new Error(`Falha na geração do PDF HTML: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
-    } finally {
-      if (browser) {
-        await browser.close()
-      }
     }
   }
   
-public static fillTemplate(
+  public static fillTemplate(
     template: string,
     prescription: Prescription,
     patient: PatientData,
-    doctor: User,
-    isSpecialControl: boolean = false
+    doctor: User
   ): string {
     console.log('=== INÍCIO fillTemplate ===')
-    console.log('isSpecialControl:', isSpecialControl)
     console.log('Template length:', template.length)
     
     // 1. Gerar HTML dos medicamentos
     console.log('1. Gerando HTML dos medicamentos...')
-    console.log('Medications:', JSON.stringify(prescription.medications, null, 2))
     
     const medicationsHtml = prescription.medications?.map((med, index) => {
       console.log(`Gerando HTML para medicamento ${index + 1}:`, med.name)
@@ -112,30 +88,29 @@ public static fillTemplate(
     `
     }).join('') || ''
     
-    console.log('Medications HTML gerado:', medicationsHtml)
+    console.log('Medications HTML gerado')
 
-    // 2. Substituir placeholders
+    // 2. Substituir placeholders no template
     console.log('2. Substituindo placeholders...')
+    
+    // Primeiro, substituir os dados dinâmicos
     let filledHtml = template
-      // Dados do paciente
-      .replace('{{PATIENTE_NOME}}', patient.name || '')
-      .replace('{{PATIENTE_CPF}}', this.formatCPF(patient.cpf || ''))
-      .replace('{{PATIENTE_ENDERECO}}', patient.address || '')
-      .replace('{{PATIENTE_TELEFONE}}', patient.phone || '')
+      .replace(/\{\{PATIENTE_NOME\}\}/g, patient.name || '')
+      .replace(/\{\{PATIENTE_CPF\}\}/g, this.formatCPF(patient.cpf || ''))
+      .replace(/\{\{PATIENTE_ENDERECO\}\}/g, patient.address || '')
+      .replace(/\{\{PATIENTE_TELEFONE\}\}/g, patient.phone || '')
+      .replace(/\{\{MEDICAMENTOS\}\}/g, medicationsHtml)
+      .replace(/\{\{DATA_RECEITA\}\}/g, new Date(prescription.createdAt || new Date()).toLocaleDateString('pt-BR'))
+      .replace(/\{\{MEDICO_NOME\}\}/g, doctor.name || '')
+      .replace(/\{\{MEDICO_CRM\}\}/g, doctor.crm || '')
+      .replace(/\{\{INSTRUCOES_GERAIS\}\}/g, prescription.instructions || '')
 
-      // Dados da receita - TRATAMENTO ESPECIAL PARA CONTROLE ESPECIAL
-      .replace('{{MEDICAMENTOS}}', medicationsHtml)
-      .replace('{{DATA_RECEITA}}', new Date(prescription.createdAt || new Date()).toLocaleDateString('pt-BR'))
-
-      // Dados do médico
-      .replace('{{MEDICO_NOME}}', doctor.name || '')
-      .replace('{{MEDICO_CRM}}', doctor.crm || '')
-
-      // Instructions adicionais
-      .replace('{{INSTRUCOES_GERAIS}}', prescription.instructions || '')
-
+    // 3. IMPORTANTE: Remover o JavaScript que duplica a receita
+    // O HTML já está duplicado no template, não precisamos de JavaScript
+    console.log('3. Removendo JavaScript de duplicação...')
+    filledHtml = filledHtml.replace(/<script>[\s\S]*?<\/script>/gi, '')
+    
     console.log('HTML final gerado, tamanho:', filledHtml.length)
-    console.log('Primeiros 200 caracteres do HTML final:', filledHtml.substring(0, 200))
     
     return filledHtml
   }

@@ -1,9 +1,6 @@
 import PDFDocument from 'pdfkit'
 import { Prescription, Patient, User, PatientData } from '../types'
 import { HTMLToPDFService } from './htmlToPdfService'
-import puppeteer from 'puppeteer'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 import { PDFDocument as PDFLibDocument } from 'pdf-lib'
 
 const formatCPF = (cpf: string): string => {
@@ -25,9 +22,10 @@ export class PDFService {
     console.log('Prescription ID:', prescription.id)
     console.log('Total medicamentos:', prescription.medications?.length)
 
-    // Se for controle especial com múltiplos medicamentos, gerar PDF mesclado
+    // Se for controle especial com múltiplos medicamentos, gerar PDFs separados
+    // Motivo: Permite ao paciente comprar os medicamentos em momentos diferentes
     if (prescription.type === 'special_control' && prescription.medications && prescription.medications.length > 1) {
-      console.log('→ Controle Especial com múltiplos medicamentos - gerando PDF mesclado')
+      console.log('→ Controle Especial com múltiplos medicamentos - gerando PDFs separados')
       
       // Criar uma "prescrição" separada para cada medicamento
       const prescriptionsArray = prescription.medications.map((med, index) => ({
@@ -40,7 +38,7 @@ export class PDFService {
     
     // Se for controle especial com 1 medicamento, usar HTML → PDF
     if (prescription.type === 'special_control') {
-      console.log('→ Usando Puppeteer (HTMLToPDFService)')
+      console.log('→ Usando html-pdf-node (HTMLToPDFService)')
       return await HTMLToPDFService.generateSpecialControlPDF(
         prescription,
         patient,
@@ -64,7 +62,7 @@ export class PDFService {
     console.log('👨‍⚕️ Doctor:', doctor.name)
     
     try {
-      console.log('🔍 Gerando PDF com template HTML para cada página...')
+      console.log('📝 Gerando PDFs individuais com template HTML...')
       
       // Gerar PDF para cada prescrição usando o template HTML
       const pdfPromises = prescriptions.map((prescription, index) => {
@@ -83,13 +81,13 @@ export class PDFService {
         return pdfBase64Array[0]
       }
       
-      // Merge de múltiplos PDFs
+      // Merge de múltiplos PDFs usando pdf-lib
       console.log('🔗 Iniciando merge de', pdfBase64Array.length, 'PDFs...')
       
       const mergedPdf = await PDFLibDocument.create()
       
       for (let i = 0; i < pdfBase64Array.length; i++) {
-        console.log(`📑 Adicionando PDF ${i + 1}/${pdfBase64Array.length} ao merge...`)
+        console.log(`🔓 Adicionando PDF ${i + 1}/${pdfBase64Array.length} ao merge...`)
         
         // Converter base64 para buffer
         const pdfBuffer = Buffer.from(pdfBase64Array[i], 'base64')

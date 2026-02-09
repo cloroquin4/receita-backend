@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receituário Controle Especial - INEMATT (Automático)</title>
+    <title>Receituário Controle Especial - INEMATT</title>
     <style>
         :root {
             --primary-green: #006b35; 
@@ -30,16 +30,11 @@
         .page-container {
             background-color: white;
             width: 100%;
-            max-width: 1123px; /* A4 landscape width em px */
+            max-width: 1123px;
+            height: 782px;
             display: flex;
             flex-direction: row;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-
-            /* Tratar cada container como uma página física */
-            min-height: 100vh;
-            page-break-after: always;
-            break-after: page;
-            page-break-inside: avoid;
         }
 
         .receipt {
@@ -48,10 +43,12 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            height: 100%;
+            overflow: hidden;
         }
 
-        /* O CSS vai desenhar a linha pontilhada APENAS na primeira via automaticamente */
-        .receipt:first-child {
+        /* Linha pontilhada APENAS entre 1ª e 2ª via */
+        .receipt.receipt-farmacia {
             border-right: 2px dashed #333;
         }
 
@@ -88,6 +85,12 @@
             font-size: 9px;
             border-radius: 2px;
             margin-left: auto;
+        }
+
+        .via-badge.via-paciente {
+            background-color: var(--primary-green);
+            color: white;
+            border: 1px solid white;
         }
 
         .header-content {
@@ -138,6 +141,11 @@
             flex-wrap: wrap;
         }
 
+        .cnpj-strip.no-border {
+            border-top: none;
+            padding-top: 0;
+        }
+
         /* === CORPO === */
         .form-line {
             margin-bottom: 12px;
@@ -154,12 +162,19 @@
         .line {
             flex: 1;
             border-bottom: 1px solid #000;
+            position: relative;
+        }
+
+        .line-content {
+            position: absolute;
+            left: 0;
+            top: -2px;
+            font-size: 10px;
         }
 
         .prescription-area {
             flex: 1;
             min-height: 150px;
-            page-break-inside: avoid;
         }
 
         .date-signature-row {
@@ -174,6 +189,11 @@
         .date-box {
             display: flex;
             align-items: flex-end;
+        }
+
+        .date-text {
+            font-size: 9px;
+            margin-left: 20px;
         }
         
         .signature-line {
@@ -244,11 +264,49 @@
             flex: 1;
         }
 
+        .row-split .small-input.flex-2 {
+            flex: 2;
+        }
+
+        .row-split .small-input.flex-half {
+            flex: 0.5;
+        }
+
         .supplier-content {
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             height: 100%;
+        }
+
+        .signature-area {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .signature-field {
+            flex: 1;
+            text-align: center;
+        }
+
+        .signature-border {
+            border-bottom: 1px solid #000;
+            margin-bottom: 2px;
+        }
+
+        .signature-label {
+            font-size: 8px;
+        }
+
+        .date-field {
+            width: 80px;
+            text-align: center;
+        }
+
+        .date-placeholder {
+            border-bottom: 1px solid #000;
+            margin-bottom: 2px;
         }
 
         @media print {
@@ -260,17 +318,11 @@
             .page-container { 
                 box-shadow: none; 
                 width: 100%; 
+                max-width: none;
                 height: 100vh;
-                max-width: 1123px;
-                max-height: 794px;
-                overflow: hidden;
-                page-break-after: always;
-                break-after: page;
-                page-break-inside: avoid;
-            }
-            .page-container:last-child {
-                page-break-after: auto;
-                break-after: auto;
+                overflow: visible;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
             }
             @page {
                 size: A4 landscape;
@@ -281,9 +333,10 @@
 </head>
 <body>
 
-    <div class="page-container" id="pageContainer">
+    <div class="page-container">
         
-        <div class="receipt" id="modeloReceita">
+        <!-- 1ª VIA - FARMÁCIA -->
+        <div class="receipt receipt-farmacia">
             <div class="main-title">RECEITUÁRIO CONTROLE ESPECIAL</div>
             
             <div class="header-box">
@@ -293,7 +346,7 @@
                 </div>
                 <div class="header-content">
                     <div class="logo-area">
-                        <img src="assets/logoinematt.png" alt="Logo INEMATT" class="logo-img">
+                        <img src="assets/logoinematt.png" alt="Logo INEMATT" class="logo-img" onerror="this.style.display='none'">
                     </div>
                     <div class="info-area">
                         <h1>INEMATT - INSTITUTO NEFROLÓGICO LTDA</h1>
@@ -308,78 +361,223 @@
                     <span>CNPJ Várzea Grande: 73.814.550/0001-18</span>
                     <span>CNPJ SORRISO: 73.814.550/0008-94</span>
                 </div>
-                <div class="cnpj-strip" style="border-top: none; padding-top: 0;">
+                <div class="cnpj-strip no-border">
                     <span>CNPJ Primavera: 73.814.550/0007-03</span>
                     <span>INSC. EST.: ISENTO</span>
                 </div>
             </div>
 
-            <div class="form-line"><span class="label">Paciente:</span><div class="line" style="position: relative;"><span style="position: absolute; left: 0; top: -2px; font-size: 10px;">{{PATIENTE_NOME}}</span></div></div>
-            <div class="form-line"><span class="label">Endereço:</span><div class="line" style="position: relative;"><span style="position: absolute; left: 0; top: -2px; font-size: 10px;">{{PATIENTE_ENDERECO}}</span></div></div>
-            <div class="form-line"><span class="label">Prescrição:</span></div>
+            <div class="form-line">
+                <span class="label">Paciente:</span>
+                <div class="line">
+                    <span class="line-content">{{PATIENTE_NOME}}</span>
+                </div>
+            </div>
+            
+            <div class="form-line">
+                <span class="label">Endereço:</span>
+                <div class="line">
+                    <span class="line-content">{{PATIENTE_ENDERECO}}</span>
+                </div>
+            </div>
+            
+            <div class="form-line">
+                <span class="label">Prescrição:</span>
+            </div>
+            
             <div class="prescription-area">{{MEDICAMENTOS}}</div>
             
             <div class="date-signature-row">
-<!--                 <div class="date-box">Data: &nbsp; <div style="border-bottom: 1px solid #000; width: 20px;"></div> / <div style="border-bottom: 1px solid #000; width: 20px;"></div> / <div style="border-bottom: 1px solid #000; width: 40px;"></div><br><span style="font-size: 9px; margin-left: 20px;">Data</span></div>
-                 
- -->                <div class="date-box"><br><span style="font-size: 9px; margin-left: 20px;">{{DATA_RECEITA}}</span></div>
-<div class="signature-line">{{MEDICO_NOME}} </br> MÉDICO </br> {{MEDICO_CRM}} </div>
+                <div class="date-box">
+                    <br>
+                    <span class="date-text">{{DATA_RECEITA}}</span>
+                </div>
+                <div class="signature-line">
+                    {{MEDICO_NOME}}<br>
+                    MÉDICO<br>
+                    {{MEDICO_CRM}}
+                </div>
             </div>
 
             <div class="footer-grid">
                 <div class="footer-box">
                     <div class="footer-title">IDENTIFICAÇÃO DO COMPRADOR</div>
                     <div class="footer-content">
-                        <div class="small-input"><span>Nome completo:</span><div class="small-line"></div></div>
-                        <div class="row-split"><div class="small-input" style="flex: 1;"><span>Identidade:</span><div class="small-line"></div></div><div class="small-input" style="flex: 1;"><span>orgão Emissor:</span><div class="small-line"></div></div></div>
-                        <div class="small-input"><span>End:</span><div class="small-line"></div></div>
-                        <div class="row-split"><div class="small-input" style="flex: 2;"><span>Cidade:</span><div class="small-line"></div></div><div class="small-input" style="flex: 0.5;"><span>UF:</span><div class="small-line"></div></div></div>
-                        <div class="small-input"><span>Tel.:</span><div class="small-line"></div></div>
+                        <div class="small-input">
+                            <span>Nome completo:</span>
+                            <div class="small-line"></div>
+                        </div>
+                        <div class="row-split">
+                            <div class="small-input">
+                                <span>Identidade:</span>
+                                <div class="small-line"></div>
+                            </div>
+                            <div class="small-input">
+                                <span>Órgão Emissor:</span>
+                                <div class="small-line"></div>
+                            </div>
+                        </div>
+                        <div class="small-input">
+                            <span>End:</span>
+                            <div class="small-line"></div>
+                        </div>
+                        <div class="row-split">
+                            <div class="small-input flex-2">
+                                <span>Cidade:</span>
+                                <div class="small-line"></div>
+                            </div>
+                            <div class="small-input flex-half">
+                                <span>UF:</span>
+                                <div class="small-line"></div>
+                            </div>
+                        </div>
+                        <div class="small-input">
+                            <span>Tel.:</span>
+                            <div class="small-line"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="footer-box">
                     <div class="footer-title">IDENTIFICAÇÃO DO FORNECEDOR</div>
                     <div class="footer-content supplier-content">
-                        <div style="display: flex; gap: 10px; align-items: flex-end;">
-                            <div style="flex: 1; text-align: center;"><div style="border-bottom: 1px solid #000; margin-bottom: 2px;"></div><span style="font-size: 8px;">Assinatura do Farmacêutico</span></div>
-                            <div style="width: 80px; text-align: center;"><div style="border-bottom: 1px solid #000; margin-bottom: 2px;">__/__/__</div><span style="font-size: 8px;">Data</span></div>
+                        <div class="signature-area">
+                            <div class="signature-field">
+                                <div class="signature-border"></div>
+                                <span class="signature-label">Assinatura do Farmacêutico</span>
+                            </div>
+                            <div class="date-field">
+                                <div class="date-placeholder">__/__/__</div>
+                                <span class="signature-label">Data</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom-note">BULA DOS PRODUTOS NA PARTE INTERNA DO BLOCO</div>
         </div>
-        </div>
 
-    <script>
-        // Quando a página carregar, executa isso:
-        document.addEventListener("DOMContentLoaded", function() {
-            const container = document.getElementById('pageContainer');
-            const receitaOriginal = document.getElementById('modeloReceita');
+        <!-- 2ª VIA - PACIENTE -->
+        <div class="receipt">
+            <div class="main-title">RECEITUÁRIO CONTROLE ESPECIAL</div>
             
-            // 1. Garante que a primeira via tenha o texto correto
-            const badge1 = receitaOriginal.querySelector('.via-badge');
-            if(badge1) badge1.innerText = '1ª VIA - FARMÁCIA';
+            <div class="header-box">
+                <div class="header-strip">
+                    <span>IDENTIFICAÇÃO DO EMITENTE</span>
+                    <span class="via-badge via-paciente">2ª VIA - PACIENTE</span>
+                </div>
+                <div class="header-content">
+                    <div class="logo-area">
+                        <img src="assets/logoinematt.png" alt="Logo INEMATT" class="logo-img" onerror="this.style.display='none'">
+                    </div>
+                    <div class="info-area">
+                        <h1>INEMATT - INSTITUTO NEFROLÓGICO LTDA</h1>
+                        <p>Rua Espírito Santo, S/Nº - Anexo a Rede Cegonha - Fones: (65) 3621-4060 / 3051-4060 / 3026-3005</p>
+                        <p>Bairro Nova Várzea Grande - CEP: 78135-706 - Várzea Grande - Mato Grosso</p>
+                        <p>Rua São Caetano, 441 Atrás Hosp. São Lucas - Fone: (66) 9.9686-2040 Bairro Cidade Primavera - 1</p>
+                        <p>CEP: 78830-000 - Primavera do Leste - MT.</p>
+                        <p>Av. Brasil, 2004 - Fone: (66) 3199-1305 - Bairro: Vila Romana. Cep: 78891-138 - Cidade: Sorriso-MT</p>
+                    </div>
+                </div>
+                <div class="cnpj-strip">
+                    <span>CNPJ Várzea Grande: 73.814.550/0001-18</span>
+                    <span>CNPJ SORRISO: 73.814.550/0008-94</span>
+                </div>
+                <div class="cnpj-strip no-border">
+                    <span>CNPJ Primavera: 73.814.550/0007-03</span>
+                    <span>INSC. EST.: ISENTO</span>
+                </div>
+            </div>
 
-            // 2. Clona (duplica) a receita inteira
-            const receitaCopia = receitaOriginal.cloneNode(true);
+            <div class="form-line">
+                <span class="label">Paciente:</span>
+                <div class="line">
+                    <span class="line-content">{{PATIENTE_NOME}}</span>
+                </div>
+            </div>
+            
+            <div class="form-line">
+                <span class="label">Endereço:</span>
+                <div class="line">
+                    <span class="line-content">{{PATIENTE_ENDERECO}}</span>
+                </div>
+            </div>
+            
+            <div class="form-line">
+                <span class="label">Prescrição:</span>
+            </div>
+            
+            <div class="prescription-area">{{MEDICAMENTOS}}</div>
+            
+            <div class="date-signature-row">
+                <div class="date-box">
+                    <br>
+                    <span class="date-text">{{DATA_RECEITA}}</span>
+                </div>
+                <div class="signature-line">
+                    {{MEDICO_NOME}}<br>
+                    MÉDICO<br>
+                    {{MEDICO_CRM}}
+                </div>
+            </div>
 
-            // 3. Remove o ID da cópia para não ter IDs duplicados (boa prática)
-            receitaCopia.removeAttribute('id');
+            <div class="footer-grid">
+                <div class="footer-box">
+                    <div class="footer-title">IDENTIFICAÇÃO DO COMPRADOR</div>
+                    <div class="footer-content">
+                        <div class="small-input">
+                            <span>Nome completo:</span>
+                            <div class="small-line"></div>
+                        </div>
+                        <div class="row-split">
+                            <div class="small-input">
+                                <span>Identidade:</span>
+                                <div class="small-line"></div>
+                            </div>
+                            <div class="small-input">
+                                <span>Órgão Emissor:</span>
+                                <div class="small-line"></div>
+                            </div>
+                        </div>
+                        <div class="small-input">
+                            <span>End:</span>
+                            <div class="small-line"></div>
+                        </div>
+                        <div class="row-split">
+                            <div class="small-input flex-2">
+                                <span>Cidade:</span>
+                                <div class="small-line"></div>
+                            </div>
+                            <div class="small-input flex-half">
+                                <span>UF:</span>
+                                <div class="small-line"></div>
+                            </div>
+                        </div>
+                        <div class="small-input">
+                            <span>Tel.:</span>
+                            <div class="small-line"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-box">
+                    <div class="footer-title">IDENTIFICAÇÃO DO FORNECEDOR</div>
+                    <div class="footer-content supplier-content">
+                        <div class="signature-area">
+                            <div class="signature-field">
+                                <div class="signature-border"></div>
+                                <span class="signature-label">Assinatura do Farmacêutico</span>
+                            </div>
+                            <div class="date-field">
+                                <div class="date-placeholder">__/__/__</div>
+                                <span class="signature-label">Data</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom-note">BULA DOS PRODUTOS NA PARTE INTERNA DO BLOCO</div>
+        </div>
+        
+    </div>
 
-            // 4. Altera o texto da "badge" na cópia para 2ª VIA
-            const badge2 = receitaCopia.querySelector('.via-badge');
-            if(badge2) {
-                badge2.innerText = '2ª VIA - PACIENTE';
-                // Adiciona o estilo verde na 2ª via (como estava no original)
-                badge2.style.backgroundColor = 'var(--primary-green)';
-                badge2.style.color = 'white';
-                badge2.style.border = '1px solid white';
-            }
-
-            // 5. Adiciona a cópia na página
-            container.appendChild(receitaCopia);
-        });
-    </script>
 </body>
 </html>
