@@ -1,14 +1,12 @@
 import { Pool } from 'pg'
 import bcrypt from 'bcryptjs'
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'receit_db',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
+// 🔹 Pool usando APENAS DATABASE_URL
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 })
 
+// 🔹 Função padrão de query
 export const query = async (text: string, params?: any[]) => {
   const start = Date.now()
   try {
@@ -22,6 +20,7 @@ export const query = async (text: string, params?: any[]) => {
   }
 }
 
+// 🔹 Inicialização do banco
 export const initDatabase = async () => {
   try {
     // Necessário para gen_random_uuid()
@@ -96,18 +95,22 @@ export const initDatabase = async () => {
       )
     `)
 
-    // Seed idempotente do usuário único (admin)
+    // Seed idempotente do usuário admin
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@receit.com'
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
     const adminName = process.env.ADMIN_NAME || 'Administrador'
     const adminCrm = process.env.ADMIN_CRM || 'CRM-0000'
 
-    const existing = await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [adminEmail])
+    const existing = await query(
+      'SELECT id FROM users WHERE email = $1 LIMIT 1',
+      [adminEmail]
+    )
+
     if (existing.rowCount === 0) {
       const hashed = await bcrypt.hash(adminPassword, 10)
       await query(
         'INSERT INTO users (email, password, name, crm) VALUES ($1, $2, $3, $4)',
-        [adminEmail, hashed, adminName, adminCrm],
+        [adminEmail, hashed, adminName, adminCrm]
       )
       console.log('✅ Usuário admin criado com sucesso')
     }
