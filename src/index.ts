@@ -33,13 +33,13 @@ app.use(errorHandler)
 const startServer = async () => {
   try {
     await initDatabase()
-    app.listen(PORT, () => {
-console.log('Servidor iniciado com sucesso');
+    app.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
     })
   } catch (error) {
-    console.error('❌ Falha ao iniciar servidor:', error)
-    process.exit(1)
-  }
+  console.error('❌ Falha ao iniciar servidor:', error)
+  // NÃO finalize o processo
+}
 }
 
 startServer()
